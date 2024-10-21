@@ -5,14 +5,16 @@ import (
 	"goolang/handlers"
 )
 
-func SetRoutes(address string) {
+func SetRoutes() *gin.Engine {
 	router := gin.Default()
 
-	router.GET("/weddings", handlers.GetWeddings)
-	router.GET("/weddings/:guid", handlers.GetWedding)
-	router.POST("/weddings", handlers.CreateWeddingRequest)
-	router.PUT("/weddings/:guid", handlers.UpdateWedding)
-	router.DELETE("/weddings/:guid", handlers.DeleteWedding)
+	// wedding routes
+	weddingGroup := router.Group("/weddings")
+	handlers.RouteWeddingHandler(weddingGroup)
 
-	router.Run(address)
+	// guest routes
+	guestGroup := router.Group("/guests")
+	handlers.RouteGuestHandler(guestGroup)
+
+	return router
 }

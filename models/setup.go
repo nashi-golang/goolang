@@ -15,7 +15,7 @@ func SetupDatabase() {
 	if err != nil {
 		panic("failed to connect database")
 	}
-	db.AutoMigrate(&Wedding{}, &People{})
+	db.AutoMigrate(&Wedding{}, &Person{})
 
 	DB = db
 }

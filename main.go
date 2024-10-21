@@ -10,7 +10,9 @@ import (
 
 func main() {
 	models.SetupDatabase()
-	routes.SetRoutes(":8080")
+	r := routes.SetRoutes()
+
+	r.Run(":8080")
 }
 
 //TIP See GoLand help at <a href="https://www.jetbrains.com/help/go/">jetbrains.com/help/go/</a>.

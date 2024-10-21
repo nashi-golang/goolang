@@ -9,11 +9,19 @@ import (
 )
 
 type WeddingDto struct {
-	Guid          string `json:"guid"`
-	StartDatetime string `json:"start_datetime" binding:"required"`
-	Location      string `json:"location" binding:"required"`
-	Groom         string `json:"groom" binding:"required"`
-	Bride         string `json:"bride" binding:"required"`
+	Guid          string    `json:"guid"`
+	StartDatetime string    `json:"start_datetime" binding:"required"`
+	Location      string    `json:"location" binding:"required"`
+	Groom         PersonDto `json:"groom"`
+	Bride         PersonDto `json:"bride"`
+}
+
+func RouteWeddingHandler(router *gin.RouterGroup) {
+	router.POST("", CreateWeddingRequest)
+	router.GET("", GetWeddings)
+	router.GET("/:guid", GetWedding)
+	router.PUT("/:guid", UpdateWedding)
+	router.DELETE("/:guid", DeleteWedding)
 }
 
 func CreateWeddingRequest(c *gin.Context) {
@@ -29,13 +37,27 @@ func CreateWeddingRequest(c *gin.Context) {
 		log.Fatal("failed to parse time:", err)
 	}
 
+	newGroomItem := models.Person{
+		Guid:        util.GenerateGuid(),
+		WeddingGuid: guid,
+		Name:        newWedding.Groom.Name,
+		PhoneNumber: newWedding.Groom.PhoneNumber}
+
+	newBrideItem := models.Person{
+		Guid:        util.GenerateGuid(),
+		WeddingGuid: guid,
+		Name:        newWedding.Bride.Name,
+		PhoneNumber: newWedding.Bride.PhoneNumber}
+
 	newWeddingItem := models.Wedding{
 		Guid:          guid,
 		StartDatetime: tartDateTime,
 		Location:      newWedding.Location,
-		Groom:         newWedding.Groom,
-		Bride:         newWedding.Bride}
+		Groom:         newGroomItem.Guid,
+		Bride:         newBrideItem.Guid}
 
+	models.DB.Create(newGroomItem)
+	models.DB.Create(newBrideItem)
 	models.DB.Create(newWeddingItem)
 
 	c.JSON(201, newWeddingItem)
@@ -86,8 +108,8 @@ func UpdateWedding(c *gin.Context) {
 		models.Wedding{
 			StartDatetime: tartDateTime,
 			Location:      updatedWedding.Location,
-			Groom:         updatedWedding.Groom,
-			Bride:         updatedWedding.Bride})
+			Groom:         updatedWedding.Groom.Guid,
+			Bride:         updatedWedding.Bride.Guid})
 
 	c.JSON(200, updatedWedding)
 }
